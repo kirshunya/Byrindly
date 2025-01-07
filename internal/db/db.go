@@ -8,15 +8,13 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 var db *gorm.DB
 
 func Connect() {
-	envFilePath := filepath.Join("..", ".env")
-	log.Print("Loading environment variables from:", envFilePath)
-	err := godotenv.Load("D:\\Byrindly\\.env") // Указание пути к файлу .env
+	envFilePath := "D:\\Byrindly\\.env"
+	err := godotenv.Load(envFilePath)
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
@@ -29,7 +27,7 @@ func Connect() {
 		os.Getenv("DB_PORT"),
 	)
 
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open(dsn))
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
@@ -46,12 +44,14 @@ func CreateTable() {
 	}
 }
 
-func CreateUser(user model.User) {
-	result := db.Create(user)
+func CreateUser(user model.User) error {
+	result := db.Create(&user)
 	if result.Error != nil {
 		log.Fatalf("Failed to create user %s", result.Error)
+		return result.Error
 	} else {
-		log.Printf("User created: \nID:%s\nName:%s\n", user.ID, user.Name)
+		log.Printf("User created: \nID:%d\nName:%s\n", user.ID, user.Name)
+		return nil
 	}
 }
 

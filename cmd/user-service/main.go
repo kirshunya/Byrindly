@@ -2,31 +2,46 @@ package main
 
 import (
 	"byrindly/internal/db"
-	model "byrindly/internal/user-service/model"
-	"fmt"
-	"time"
+	"byrindly/internal/user-service/model"
+	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
 )
 
-func main() {
-	user := model.User{
-		ID:               1,
-		Name:             "Test User",
-		Age:              25,
-		Gender:           1, // Например, 1 для мужчины
-		Latitude:         40.7128,
-		Longitude:        -74.0060,
-		RegistrationDate: time.Now(),
-		About:            "This is a test user.",
-		Username:         "testuser",
-		Photo:            "link_to_test_photo",
-		TgId:             123456789,
-		Password:         "securepassword",
+func getUsers(c *gin.Context) {
+	users, err := db.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Users not found."})
+		log.Fatal(err)
 	}
+	c.JSON(http.StatusOK, users)
+}
+
+func createUser(c *gin.Context) {
+	var user model.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	db.CreateUser(user)
+	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully.", "user": user})
+}
+
+func main() {
 
 	db.Connect()
 	db.CreateTable()
-	db.CreateUser(user)
-	users, err := db.GetAllUsers()
-	fmt.Println(err, users)
-	db.Close()
+
+	defer db.Close()
+
+	router := gin.Default()
+
+	router.GET("/users", getUsers)
+	router.POST("/create", createUser)
+
+	err := router.Run(":8081")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
