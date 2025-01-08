@@ -116,3 +116,25 @@ func GetUserById(id uint64) (model.User, error) {
 
 	return user, nil
 }
+
+func DeleteUserById(id uint64) error {
+	var user model.User
+
+	result := db.First(&user, id)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			log.Printf("User with ID %d not found.", id)
+			return gorm.ErrRecordNotFound
+		}
+		log.Printf("Error retrieving user: %s", result.Error)
+		return result.Error
+	}
+
+	if err := db.Delete(&user).Error; err != nil {
+		log.Printf("Failed to delete user with ID %d: %s", id, err)
+		return err
+	}
+
+	log.Printf("User with ID %d deleted successfully.", id)
+	return nil
+}

@@ -72,8 +72,22 @@ func getUserById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User successfully found.", "user": user})
 }
 
-func main() {
+func deleteUserById(c *gin.Context) {
+	id := c.Param("id")
+	userID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	err = db.DeleteUserById(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User successfully deleted.", "status": "successfully"})
+}
 
+func main() {
 	db.Connect()
 	db.CreateTable()
 
@@ -81,11 +95,11 @@ func main() {
 
 	router := gin.Default()
 
-	//TODO: Delete by ID,
 	router.GET("/users", getUsers)
 	router.GET("/user/:id", getUserById)
 	router.POST("/create", createUser)
 	router.PUT("/update/:id", updateUserById)
+	router.DELETE("/delete/:id", deleteUserById)
 
 	err := router.Run(":8081")
 	if err != nil {
