@@ -3,7 +3,7 @@ package model
 import "time"
 
 type User struct {
-	ID               int64     `gorm:"primaryKey;autoIncrement" json:"id"`
+	ID               uint64    `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name             string    `json:"name"`
 	Age              uint8     `json:"age"`
 	Gender           uint8     `json:"gender"`
@@ -12,8 +12,11 @@ type User struct {
 	RegistrationDate time.Time `json:"registration-date"`
 	About            string    `json:"about"`
 
-	Username string `json:"username"`
-	Photo    string `json:"photo"`
-	TgId     int64  `json:"tg-id"`
-	Password string `json:"password"`
+	Username    string `json:"username"`
+	Photo       string `json:"photo"`
+	TgId        int64  `json:"tg-id"`
+	Password    string `json:"password"`
+	UserId      string `json:"userId"`
+	Status      uint8  `json:"status"`
+	ProfileLink string `json:"profile-link"`
 }
